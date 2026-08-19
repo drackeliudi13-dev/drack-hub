@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>DRACK HUB</title>
+
+<style>
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #080808;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+.box {
+  width: 85%;
+  max-width: 360px;
+  background: #151515;
+  padding: 30px;
+  border-radius: 18px;
+  text-align: center;
+}
+
+h1 {
+  margin-bottom: 8px;
+}
+
+p {
+  color: #aaa;
+}
+
+input {
+  width: 100%;
+  padding: 14px;
+  margin: 15px 0;
+  border: 0;
+  border-radius: 10px;
+  box-sizing: border-box;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  border: 0;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+#error {
+  color: #ff5555;
+  margin-top: 15px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+  <h1>🤖 DRACK HUB</h1>
+
+  <p>🔐 Ingiza password kuendelea</p>
+
+  <input
+    id="password"
+    type="password"
+    placeholder="Password"
+  >
+
+  <button onclick="login()">
+    LOGIN
+  </button>
+
+  <div id="error"></div>
+
+</div>
+
+<script>
+
+async function login() {
+
+  const password =
+    document.getElementById("password").value;
+
+  if (!password) {
+    document.getElementById("error").innerText =
+      "Ingiza password";
+    return;
+  }
+
+  try {
+
+    const response = await fetch("/login", {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+        password: password
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+
+      localStorage.setItem(
+        "drackLogin",
+        "true"
+      );
+
+      window.location.href =
+        "/home.html";
+
+    } else {
+
+      document.getElementById("error").innerText =
+        "❌ Password sio sahihi";
+
+    }
+
+  } catch (error) {
+
+    document.getElementById("error").innerText =
+      "❌ Server haipatikani";
+
+  }
+
+}
+
+</script>
+
+</body>
+</html>

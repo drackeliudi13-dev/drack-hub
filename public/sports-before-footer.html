@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>DRACK SPORTS</title>
+
+<style>
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  background:#080808;
+  color:#fff;
+  font-family:Arial,sans-serif;
+}
+
+header{
+  padding:25px 16px;
+  text-align:center;
+  background:#111;
+  border-bottom:1px solid #292929;
+}
+
+.logo{
+  font-size:29px;
+  font-weight:800;
+}
+
+.sub{
+  color:#999;
+  margin-top:6px;
+}
+
+nav{
+  display:flex;
+  gap:7px;
+  overflow-x:auto;
+  padding:10px 3%;
+  background:#101010;
+  border-bottom:1px solid #292929;
+}
+
+nav a{
+  flex:0 0 auto;
+  text-decoration:none;
+  color:#fff;
+  background:#1c1c1c;
+  padding:10px 14px;
+  border-radius:22px;
+  font-size:13px;
+  font-weight:bold;
+}
+
+.container{
+  width:94%;
+  max-width:750px;
+  margin:auto;
+  padding:18px 0 40px;
+}
+
+.hero{
+  background:#151515;
+  border-radius:18px;
+  padding:22px;
+  margin-bottom:18px;
+  border:1px solid #292929;
+}
+
+.hero h1{
+  margin:0 0 10px;
+  font-size:27px;
+}
+
+.hero p{
+  color:#ccc;
+  line-height:1.6;
+  margin:0;
+}
+
+
+.live-box{
+  background:#151515;
+  border:1px solid #292929;
+  border-radius:16px;
+  padding:18px;
+  margin-bottom:15px;
+}
+
+.live-button{
+  display:block;
+  text-align:center;
+  text-decoration:none;
+  background:#fff;
+  color:#000;
+  padding:14px;
+  border-radius:12px;
+  font-weight:800;
+  margin-top:12px;
+}
+
+.section{
+  background:#151515;
+  border:1px solid #252525;
+  border-radius:16px;
+  padding:18px;
+  margin-bottom:15px;
+}
+
+.section h2{
+  margin-top:0;
+}
+
+.item{
+  padding:14px 0;
+  border-top:1px solid #292929;
+}
+
+.item:first-child{
+  border-top:0;
+}
+
+.badge{
+  display:inline-block;
+  background:#222;
+  color:#ddd;
+  padding:6px 10px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:bold;
+}
+
+.item h3{
+  margin:8px 0;
+}
+
+.item p{
+  color:#bbb;
+  line-height:1.5;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+  <div class="logo">
+    ⚽ DRACK SPORTS
+  </div>
+
+  <div class="sub">
+    Habari za mpira • Matokeo • Ratiba
+  </div>
+
+</header>
+
+<nav>
+
+  <a href="/home.html">
+    🏠 Home
+  </a>
+
+  <a href="/sports.html">
+    ⚽ Sports
+  </a>
+
+  <a href="/admin.html">
+    👑 Admin
+  </a>
+
+</nav>
+
+<div class="container">
+
+  <div class="hero">
+
+    <h1>
+      ⚽ KARIBU DRACK SPORTS
+    </h1>
+
+    <p>
+      Hapa tutakuwa tunaweka habari mbalimbali
+      za mpira, matokeo, ratiba, usajili na
+      taarifa muhimu za michezo.
+    </p>
+
+  </div>
+
+  
+<div class="live-box">
+
+  <span class="badge">
+    🔴 LIVE SPORTS
+  </span>
+
+  <h2>
+    ⚽ FAWA NEWS SPORT LIVE
+  </h2>
+
+  <p>
+    Tazama habari na michezo kupitia FawaNews Sport Live.
+  </p>
+
+  <a
+    class="live-button"
+    href="http://www.fawanews.sc/index.html"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    🎥 TAZAMA FAWA NEWS SPORT LIVE
+  </a>
+
+</div>
+
+<div class="section">
+
+    <h2>🔥 HABARI ZA MPIRA</h2>
+
+    <div id="news">
+      Inapakia habari...
+    </div>
+
+  </div>
+
+  <div class="section">
+
+    <h2>🏆 MATOKEO & RATIBA</h2>
+
+    <div class="item">
+
+      <span class="badge">
+        DRACK SPORTS
+      </span>
+
+      <h3>
+        📅 Ratiba na matokeo
+      </h3>
+
+      <p>
+        Sehemu hii itatumika kuweka ratiba
+        na matokeo ya michezo mbalimbali.
+      </p>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+async function loadSports(){
+
+  try{
+
+    const response =
+      await fetch("/api/posts");
+
+    const data =
+      await response.json();
+
+    const posts =
+      (data.posts || [])
+      .filter(post =>
+        post.category === "SPORTS"
+      );
+
+    const box =
+      document.getElementById("news");
+
+    if(!posts.length){
+
+      box.innerHTML =
+        `<div class="item">
+          Hakuna habari za SPORTS bado.
+        </div>`;
+
+      return;
+
+    }
+
+    box.innerHTML =
+      posts.map(post => `
+
+        <div class="item">
+
+          <span class="badge">
+            ⚽ SPORTS
+          </span>
+
+          <h3>
+            ${escapeHtml(post.title)}
+          </h3>
+
+          <p>
+            ${escapeHtml(post.content)}
+          </p>
+
+          <small>
+            🕒 ${escapeHtml(post.date)}
+          </small>
+
+        </div>
+
+      `).join("");
+
+  }catch(error){
+
+    document.getElementById("news")
+      .innerHTML =
+      `<div class="item">
+        ❌ Server haipatikani.
+      </div>`;
+
+  }
+
+}
+
+function escapeHtml(text){
+
+  return String(text || "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
+}
+
+loadSports();
+
+</script>
+
+</body>
+</html>

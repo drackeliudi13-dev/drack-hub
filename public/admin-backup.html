@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRACK ADMIN</title>
+<style>
+body{margin:0;background:#080808;color:white;font-family:Arial,sans-serif}
+header{padding:22px;text-align:center;background:#151515}
+.logo{font-size:28px;font-weight:bold}
+.sub{color:#999;margin-top:6px}
+.container{width:92%;max-width:650px;margin:auto;padding:20px 0}
+.card{background:#151515;padding:20px;border-radius:15px}
+input,textarea,select{width:100%;padding:14px;margin-top:12px;border:0;border-radius:10px;font-size:15px;box-sizing:border-box}
+textarea{min-height:150px;resize:vertical}
+button{width:100%;padding:14px;margin-top:14px;border:0;border-radius:10px;font-weight:bold;font-size:15px}
+#message{text-align:center;margin-top:15px}
+.success{color:#4cff88}
+.error{color:#ff5555}
+#preview{width:100%;max-height:300px;object-fit:cover;border-radius:12px;margin-top:15px;display:none}
+</style>
+</head>
+<body>
+
+<header>
+<div class="logo">👑 DRACK ADMIN</div>
+<div class="sub">Manage DRACK HUB</div>
+</header>
+
+<div class="container">
+<div class="card">
+
+<h2>➕ Tengeneza Post</h2>
+
+<input id="title" placeholder="Kichwa cha habari">
+
+<select id="category">
+<option value="NEWS">📰 NEWS</option>
+<option value="SPORTS">⚽ SPORTS</option>
+<option value="UPDATES">📢 UPDATES</option>
+</select>
+
+<textarea id="content" placeholder="Andika taarifa yako hapa..."></textarea>
+
+<input id="image" type="url" placeholder="Link ya picha (optional)">
+
+<input id="link" type="url" placeholder="Link nyingine (optional)">
+
+<img id="preview">
+
+<button onclick="publishPost()">📢 PUBLISH</button>
+
+<div id="message"></div>
+
+</div>
+</div>
+
+<script>
+const image=document.getElementById("image");
+const preview=document.getElementById("preview");
+
+image.addEventListener("input",()=>{
+  if(image.value.trim()){
+    preview.src=image.value.trim();
+    preview.style.display="block";
+  }else{
+    preview.style.display="none";
+  }
+});
+
+async function publishPost(){
+
+  const title=document.getElementById("title").value.trim();
+  const category=document.getElementById("category").value;
+  const content=document.getElementById("content").value.trim();
+  const imageUrl=image.value.trim();
+  const link=document.getElementById("link").value.trim();
+  const message=document.getElementById("message");
+
+  if(!title || !content){
+    message.className="error";
+    message.innerText="❌ Weka kichwa na taarifa.";
+    return;
+  }
+
+  try{
+
+    const response=await fetch("/api/posts",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        title:title,
+        category:category,
+        content:content,
+        image:imageUrl,
+        link:link
+      })
+    });
+
+    const data=await response.json();
+
+    if(data.success){
+
+      message.className="success";
+      message.innerText="✅ Post imechapishwa!";
+
+      document.getElementById("title").value="";
+      document.getElementById("content").value="";
+      image.value="";
+      document.getElementById("link").value="";
+      preview.style.display="none";
+
+    }else{
+
+      message.className="error";
+      message.innerText="❌ "+(data.message||"Imeshindikana");
+
+    }
+
+  }catch(error){
+
+    message.className="error";
+    message.innerText="❌ Server haipatikani.";
+
+  }
+}
+</script>
+
+</body>
+</html>

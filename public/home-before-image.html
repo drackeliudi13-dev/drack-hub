@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>DRACK HUB</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #080808;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  background: #151515;
+  padding: 22px;
+  text-align: center;
+}
+
+.logo {
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.sub {
+  color: #999;
+  margin-top: 6px;
+}
+
+.container {
+  width: 92%;
+  max-width: 650px;
+  margin: auto;
+  padding: 20px 0;
+}
+
+.post {
+  background: #151515;
+  padding: 20px;
+  border-radius: 15px;
+  margin-bottom: 15px;
+}
+
+.category {
+  color: #aaa;
+  font-size: 13px;
+}
+
+.post h2 {
+  margin: 8px 0;
+}
+
+.post p {
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.date {
+  color: #777;
+  font-size: 12px;
+  margin-top: 15px;
+}
+
+.link {
+  display: block;
+  margin-top: 15px;
+  padding: 12px;
+  background: white;
+  color: black;
+  text-decoration: none;
+  text-align: center;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.empty {
+  text-align: center;
+  color: #888;
+  padding: 40px 10px;
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+  <div class="logo">🤖 DRACK HUB</div>
+  <div class="sub">Karibu kwenye DRACK HUB</div>
+</header>
+
+<div class="container">
+
+  <div id="posts">
+    <div class="empty">
+      ⏳ Inapakia posts...
+    </div>
+  </div>
+
+</div>
+
+<script>
+
+async function loadPosts() {
+
+  const container =
+    document.getElementById("posts");
+
+  try {
+
+    const response =
+      await fetch("/api/posts");
+
+    const data =
+      await response.json();
+
+    if (!data.success || data.posts.length === 0) {
+
+      container.innerHTML = `
+        <div class="empty">
+          📢 Hakuna post bado.
+        </div>
+      `;
+
+      return;
+    }
+
+    container.innerHTML = data.posts.map(post => {
+
+      let link = "";
+
+      if (post.link) {
+        link = `
+          <a
+            class="link"
+            href="${post.link}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            🔗 FUNGUA LINK
+          </a>
+        `;
+      }
+
+      return `
+        <div class="post">
+
+          <div class="category">
+            ${post.category}
+          </div>
+
+          <h2>
+            ${post.title}
+          </h2>
+
+          <p>
+            ${post.content}
+          </p>
+
+          ${link}
+
+          <div class="date">
+            ${post.date}
+          </div>
+
+        </div>
+      `;
+
+    }).join("");
+
+  } catch (error) {
+
+    container.innerHTML = `
+      <div class="empty">
+        ❌ Imeshindwa kupakia posts.
+      </div>
+    `;
+
+  }
+
+}
+
+loadPosts();
+
+</script>
+
+</body>
+</html>
