@@ -7,7 +7,8 @@ const app = express();
 const PORT = 3000;
 
 const PASSWORD = "DRACK2026";
-const ADMIN_PASSWORD = "DRACKADMIN";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "DRACKADMIN";
+const adminSessions = new Map();
 
 const POSTS_FILE = path.join(__dirname, "posts.json");
 
@@ -16,6 +17,22 @@ const upload = multer({ dest: path.join(__dirname, "public/uploads") });
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
+
+
+function requireAdmin(req, res, next) {
+  const cookie = req.headers.cookie || "";
+  const match = cookie.match(/(?:^|;\\s*)drack_admin=([^;]+)/);
+  const token = match ? match[1] : null;
+
+  if (!token || !adminSessions.has(token)) {
+    return res.status(401).json({
+      success: false,
+      message: "Admin access required"
+    });
+  }
+
+  next();
+}
 
 function getPosts() {
   if (!fs.existsSync(POSTS_FILE)) {
@@ -62,6 +79,15 @@ app.post("/admin-login", (req, res) => {
   const { password } = req.body;
 
   if (password === ADMIN_PASSWORD) {
+    const token = crypto.randomBytes(32).toString("hex");
+
+    adminSessions.set(token, Date.now());
+
+    res.setHeader(
+      "Set-Cookie",
+      "drack_admin=" + token + "; HttpOnly; Path=/; SameSite=Lax"
+    );
+
     return res.json({
       success: true
     });
@@ -90,7 +116,7 @@ app.get("/api/posts", (req, res) => {
 
 /* IMAGE UPLOAD */
 
-app.post("/api/upload", upload.single("image"), (req, res) => {
+app.post("/api/upload", requireAdmin, upload.single("image"), (req, res) => {
 
   if (!req.file) {
     return res.json({
@@ -121,7 +147,7 @@ app.post("/api/upload", upload.single("image"), (req, res) => {
 
 /* CREATE POST */
 
-app.post("/api/posts", (req, res) => {
+app.post("/api/posts", requireAdmin, (req, res) => {
 
   const {
     title,
@@ -174,7 +200,7 @@ app.post("/api/posts", (req, res) => {
 
 /* EDIT POST */
 
-app.put("/api/posts/:id", (req, res) => {
+app.put("/api/posts/:id", requireAdmin, (req, res) => {
 
   const id = Number(req.params.id);
 
@@ -211,7 +237,7 @@ app.put("/api/posts/:id", (req, res) => {
 
 /* DELETE POST */
 
-app.delete("/api/posts/:id", (req, res) => {
+app.delete("/api/posts/:id", requireAdmin, (req, res) => {
 
   const id = Number(req.params.id);
 
@@ -226,6 +252,65 @@ app.delete("/api/posts/:id", (req, res) => {
     success: true
   });
 
+});
+
+/* COMMENTS */
+const COMMENTS_FILE = path.join(__dirname, "comments.json");
+
+function getComments() {
+  if (!fs.existsSync(COMMENTS_FILE)) return [];
+  try {
+    return JSON.parse(fs.readFileSync(COMMENTS_FILE, "utf8"));
+  } catch {
+    return [];
+  }
+}
+
+app.get("/api/comments", (req, res) => {
+  res.json({ success: true, comments: getComments() });
+});
+
+app.post("/api/comments", (req, res) => {
+  const name = String(req.body.name || "").trim();
+  const message = String(req.body.message || "").trim();
+
+  if (!name || !message) {
+    return res.json({ success: false, message: "Jina na maoni vinahitajika" });
+  }
+
+  if (name.length > 50 || message.length > 500) {
+    return res.json({ success: false, message: "Maoni ni marefu sana" });
+  }
+
+  const comments = getComments();
+  const newComment = {
+    id: Date.now(),
+    name,
+    message,
+    date: new Date().toLocaleString("sw-TZ")
+  };
+
+  comments.unshift(newComment);
+
+  fs.writeFileSync(
+    COMMENTS_FILE,
+    JSON.stringify(comments, null, 2)
+  );
+
+  res.json({ success: true, comment: newComment });
+});
+
+app.delete("/api/comments/:id", requireAdmin, (req, res) => {
+  const id = Number(req.params.id);
+  const comments = getComments();
+  const filtered = comments.filter(comment => comment.id !== id);
+
+  fs.writeFileSync(
+    COMMENTS_FILE,
+    JSON.stringify(filtered, null, 2)
+  );
+
+  res.json({ success: true });
 });
 
 /* SERVER */
