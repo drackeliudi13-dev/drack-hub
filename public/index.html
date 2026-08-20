@@ -96,7 +96,8 @@ async function login() {
 
   try {
 
-    const response = await fetch("/login", {
+    const response = await fetch("/admin-login", {
+      credentials: "include",
       method: "POST",
 
       headers: {

@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
@@ -21,7 +22,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 function requireAdmin(req, res, next) {
   const cookie = req.headers.cookie || "";
-  const match = cookie.match(/(?:^|;\\s*)drack_admin=([^;]+)/);
+  const match = cookie.match(/(?:^|;\s*)drack_admin=([^;]+)/);
   const token = match ? match[1] : null;
 
   if (!token || !adminSessions.has(token)) {
